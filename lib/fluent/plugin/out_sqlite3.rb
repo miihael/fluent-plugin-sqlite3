@@ -1,5 +1,3 @@
-require "sqlite3"
-
 class Fluent::Sqlite3Output < Fluent::BufferedOutput
   Fluent::Plugin.register_output('sqlite3', self)
 
@@ -10,6 +8,7 @@ class Fluent::Sqlite3Output < Fluent::BufferedOutput
   config_param :excludes, :string, :default => nil
 
   def initialize
+    require "sqlite3"
     super
   end
 
@@ -26,6 +25,7 @@ class Fluent::Sqlite3Output < Fluent::BufferedOutput
   def start
     super
     @db = ::SQLite3::Database.new @path
+    @db.busy_timeout = 5000;
     @stmts = {}
     if @table
       cols = @columns.split(DELIMITER).map {|e| ":#{e}"}.join(",")
@@ -50,12 +50,11 @@ class Fluent::Sqlite3Output < Fluent::BufferedOutput
   end
 
   def write(chunk)
-    @db.transaction
     begin
-      write1(chunk)
-      @db.commit
+      @db.transaction do
+        write1(chunk)
+      end
     rescue => ex
-      @db.rollback
       $log.error "rollback: ", ex
     end
   end
@@ -79,7 +78,9 @@ class Fluent::Sqlite3Output < Fluent::BufferedOutput
         @stmts[table] = @db.prepare (a = to_insert(table, cols))
         $log.debug "create a new table, #{table.upcase} (it may have been already created)"
       end
+      record["ts"] = time
       @stmts[table].execute record
+      $log.debug "#{tag}: insert #{record.inspect}";
     end
   end
 end

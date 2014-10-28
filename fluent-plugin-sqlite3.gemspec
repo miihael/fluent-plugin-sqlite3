@@ -6,8 +6,8 @@ Gem::Specification.new do |s|
   s.description = "fluentd output to sqlite3"
   s.authors     = ["Tomotaka Sakuma"]
   s.email       = 'ktmtmks@gmail.com'
-  s.files       = ["lib/fluent/plugin/out_sqlite3.rb"]
-  s.homepage    = 'https://github.com/tmtk75/fluent-plugin-sqlite3.git'
+  s.files       = ["lib/fluent/plugin/out_sqlite3.rb", "README.md"]
+  s.homepage    = 'https://github.com/miihael/fluent-plugin-sqlite3.git'
 
   s.add_dependency "fluentd"
   s.add_dependency "sqlite3"
